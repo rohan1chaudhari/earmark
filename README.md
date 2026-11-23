@@ -39,6 +39,7 @@ Outlet forgets every app when it quits, so connect again after restarting it. Pr
 - **Open your notes** with the toolbar icon. They open in Chrome's side panel, beside the video.
   - **Latest** lists notes newest first. **By video** groups them under each video's title.
   - **Play** plays just the passage. **Transcript** shows the whole transcript at your passage, highlighted, with a marker where you pressed. The first time you open a video's transcript, the AI labels who is speaking.
+  - **Details** opens class notes on the passage, still in points: a one-line "Remember", sections such as context, the claim, examples and caveats with sub-points, and the key terms explained. They are written the first time you open them (about 20 seconds) and kept with the note; Markdown copy and download include them.
   - **More** has the one-line summary, a verbatim quote, tags, Markdown copy and download, and Delete. It also asks whether the passage was right: **Wider** or **Narrower** re-runs the guess.
   - Search is always there. **Filters** narrows by date, channel, video, category or tag.
 

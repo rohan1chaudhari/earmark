@@ -220,3 +220,22 @@ test('readEvents picks the completed or failed event from an Outlet stream', asy
   assert.deepEqual(readEvents(bad), { failed: { code: 'busy', message: 'Busy' } });
   assert.deepEqual(readEvents('event: started\ndata: {}\n\n'), {});
 });
+
+test('cleanDetails keeps sections with points, caps sizes, and renders as Markdown', async () => {
+  const { cleanDetails, renderDetails } = await import('../lib/pipeline.js');
+  const d = cleanDetails({
+    sections: [
+      { heading: ' The claim ', points: [{ text: 'Formal verification matters most.', sub: ['Lean', '', 'unit tests', 'static typing', 'extra'] }, { text: '  ', sub: [] }] },
+      { heading: 'Empty', points: [] },
+    ],
+    terms: [{ term: 'Lean', meaning: 'A proof assistant.' }, { term: '', meaning: 'x' }],
+    takeaway: ' Prove it, do not review it. ',
+  });
+  assert.equal(d.sections.length, 1);
+  assert.deepEqual(d.sections[0], { heading: 'The claim', points: [{ text: 'Formal verification matters most.', sub: ['Lean', 'unit tests', 'static typing'] }] });
+  assert.equal(d.terms.length, 1);
+  const md = renderDetails(d).join('\n');
+  assert.match(md, /\*\*Remember:\*\* Prove it, do not review it\./);
+  assert.match(md, /### The claim\n\n- Formal verification matters most\.\n {2}- Lean/);
+  assert.throws(() => cleanDetails({ sections: [], terms: [], takeaway: '' }));
+});

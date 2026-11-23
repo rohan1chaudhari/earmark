@@ -2,7 +2,7 @@
 // A press is written to storage before anything else happens, so it survives
 // a missing key, a network failure, or the worker being shut down.
 import {
-  SYSTEM, SPAN_SCHEMA, REWRITE_SCHEMA, SPEAKERS_SCHEMA, speakersTask, cleanTurns,
+  SYSTEM, SPAN_SCHEMA, REWRITE_SCHEMA, SPEAKERS_SCHEMA, speakersTask, cleanTurns, DETAILS_SCHEMA, detailsTask, cleanDetails,
   transcriptBlock, spanTask, rewriteTask, resolveSpan, spanText, cleanNote, renderNote, noteFilename,
 } from './lib/pipeline.js';
 import { collectVocabulary } from './lib/library.js';
@@ -152,6 +152,7 @@ async function processBookmark(id, hint) {
     done.file = bm.file || noteFilename(done);
     delete done.stage;
     await set(`bm:${id}`, done);
+    if (!bm.span || bm.span.start !== span.start || bm.span.end !== span.end) await chrome.storage.local.remove(`dt:${id}`);
     saveNoteFile(cfg, done);
     notify(done, 'done', { title: note.title });
   } catch (e) {
@@ -224,6 +225,34 @@ function labelSpeakers(mediaId) {
   return job;
 }
 
+// Detailed notes for one bookmark: written the first time they are asked for,
+// and kept under their own key so saving them does not redraw the library.
+const detailing = new Map();
+function writeDetails(id) {
+  if (detailing.has(id)) return detailing.get(id);
+  const job = (async () => {
+    const saved = await get(`dt:${id}`);
+    if (saved?.sections?.length) return { ok: true, details: saved };
+    const bm = await get(`bm:${id}`);
+    if (!bm?.span || !bm.note) return { ok: false, error: 'This note is not ready yet.' };
+    const tr = await get(`tr:${bm.media_id}`);
+    if (!tr?.segments?.length) return { ok: false, error: 'The transcript for this video is no longer saved.' };
+    try {
+      const cfg = await settings();
+      const details = cleanDetails(await callModel(cfg, transcriptBlock(bm, tr.segments), detailsTask(bm.span, bm.note), DETAILS_SCHEMA));
+      // The passage may have changed (wider / narrower) while the model worked.
+      const now = await get(`bm:${id}`);
+      if (!now || now.span?.start !== bm.span.start || now.span?.end !== bm.span.end) return { ok: false, error: 'The passage changed. Open Details again.' };
+      await set(`dt:${id}`, details);
+      return { ok: true, details };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  })().finally(() => detailing.delete(id));
+  detailing.set(id, job);
+  return job;
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     if (msg.type === 'earmark:press') {
@@ -258,6 +287,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return { ok: true };
     }
     if (msg.type === 'earmark:speakers') return labelSpeakers(msg.media_id);
+    if (msg.type === 'earmark:details') return writeDetails(msg.id);
     if (msg.type === 'earmark:list') {
       return { bookmarks: await allBookmarks(), corrections: (await get('corrections')) || [] };
     }
@@ -283,7 +313,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return { ok: true };
     }
     if (msg.type === 'earmark:delete') {
-      await chrome.storage.local.remove(`bm:${msg.id}`);
+      await chrome.storage.local.remove([`bm:${msg.id}`, `dt:${msg.id}`]);
       return { ok: true };
     }
     if (msg.type === 'earmark:wipe') {

@@ -108,6 +108,20 @@ label.date input { flex: 1; min-width: 0; }
 .transcript .ts { position: absolute; left: 0; top: 0; font-size: 12px; line-height: 23px; color: var(--faint); font-variant-numeric: tabular-nums; }
 .transcript mark { background: var(--accent-soft); color: var(--text); padding: 2px 0; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .transcript .press { display: inline-block; margin: 0 5px 0 1px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: var(--accent-text); font: 600 11px/18px var(--sans); white-space: nowrap; vertical-align: 1px; }
+.details { display: grid; gap: 16px; }
+.details .remember { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--text); font-weight: 500; }
+.details .remember b { display: block; font: 650 11px/1.6 var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+.details section { display: grid; gap: 6px; }
+.details h5 { margin: 0; font: 650 11px/1.5 var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.details ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.details li { line-height: 1.5; text-wrap: pretty; }
+.details li::marker { color: var(--accent); }
+.details li ul { margin-top: 3px; gap: 2px; color: var(--muted); font-size: 13.5px; }
+.details li ul li::marker { color: var(--faint); }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; }
+.terms dt { font-weight: 600; }
+.terms dd { margin: 0; color: var(--muted); }
+@media (max-width: 480px) { .terms { grid-template-columns: 1fr; gap: 0; } .terms dd { margin-bottom: 6px; } }
 .note.pending h2 { font-size: 15px; font-weight: 600; }
 .note.pending .idea { font-size: 13.5px; color: var(--muted); }
 

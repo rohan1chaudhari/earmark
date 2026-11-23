@@ -92,8 +92,10 @@ async function copyText(button, text) {
 
 // The Markdown note is built from the bookmark on demand, so it is always
 // there to come back to and never has to be saved as a file first.
-function downloadNote(bm) {
-  const url = URL.createObjectURL(new Blob([renderNote(bm)], { type: 'text/markdown' }));
+const savedDetails = async (bm) => (await chrome.storage.local.get(`dt:${bm.id}`))[`dt:${bm.id}`] || null;
+
+async function downloadNote(bm) {
+  const url = URL.createObjectURL(new Blob([renderNote(bm, await savedDetails(bm))], { type: 'text/markdown' }));
   const a = el('a', { href: url, download: bm.file || noteFilename(bm) });
   document.body.append(a);
   a.click();
@@ -141,6 +143,30 @@ function fullTranscript(bm) {
   return wrap;
 }
 
+// Detailed notes: class notes on the passage, still in points. Written by the
+// model the first time they are opened, then kept with the bookmark.
+function detailedNotes(bm) {
+  const box = el('div', { class: 'details' });
+  // replaceChildren does not flatten arrays, so flatten here and drop empties.
+  const show = (d) => box.replaceChildren(...[
+    d.takeaway ? el('p', { class: 'remember' }, el('b', {}, 'Remember'), d.takeaway) : null,
+    d.sections.map((s) => el('section', {},
+      el('h5', {}, s.heading),
+      el('ul', {}, s.points.map((pt) => el('li', {}, pt.text, pt.sub.length ? el('ul', {}, pt.sub.map((x) => el('li', {}, x))) : null))))),
+    d.terms.length ? el('section', {}, el('h5', {}, 'Terms'),
+      el('dl', { class: 'terms' }, d.terms.map((x) => [el('dt', {}, x.term), el('dd', {}, x.meaning)]))) : null,
+  ].flat(Infinity).filter(Boolean));
+  const ask = async () => {
+    box.replaceChildren(el('p', { class: 'meta transcript-status' }, el('span', { class: 'spinner' }), ' Writing detailed notes… about 15 seconds.'));
+    const res = await send({ type: 'earmark:details', id: bm.id });
+    if (res?.ok) return show(res.details);
+    const again = el('button', { class: 'link', onclick: ask }, 'Try again');
+    box.replaceChildren(el('p', { class: 'meta' }, `Could not write detailed notes. ${res?.error || ''} `, again));
+  };
+  savedDetails(bm).then((d) => (d?.sections?.length ? show(d) : ask()));
+  return box;
+}
+
 // --- A note: its title, then its points. Everything else is one click away.
 
 function note(bm, { underVideo = false } = {}) {
@@ -156,7 +182,7 @@ function note(bm, { underVideo = false } = {}) {
   const sections = {
     more: () => {
       const copyClip = el('button', { onclick: () => copyText(copyClip, clipUrl(bm)) }, 'Copy clip link');
-      const copyNote = el('button', { onclick: () => copyText(copyNote, renderNote(bm)) }, 'Copy as Markdown');
+      const copyNote = el('button', { onclick: async () => copyText(copyNote, renderNote(bm, await savedDetails(bm))) }, 'Copy as Markdown');
       return el('div', { class: 'more' },
         // Notes with points keep their one-line summary here; older notes show it in place of points.
         points.length && n.idea ? el('p', { class: 'gist' }, n.idea) : null,
@@ -177,6 +203,7 @@ function note(bm, { underVideo = false } = {}) {
       );
     },
     transcript: () => fullTranscript(bm),
+    details: () => detailedNotes(bm),
   };
   const links = {};
   const open = (name) => {
@@ -203,6 +230,7 @@ function note(bm, { underVideo = false } = {}) {
         el('span', { class: 'at' }, time)),
       el('span', { class: 'acts' },
         el('button', { class: 'link play-clip', onclick: () => toggleClip(node, bm) }, 'Play'),
+        link('details', 'Details'),
         link('transcript', 'Transcript'),
         link('more', 'More'),
       ),
