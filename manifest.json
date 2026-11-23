@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Earmark",
+  "version": "0.1.0",
+  "description": "Press one key while watching YouTube; AI works out what you meant to keep and saves it as a short note.",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "unlimitedStorage", "downloads", "alarms", "scripting", "sidePanel"],
+  "host_permissions": ["https://www.youtube.com/*", "http://127.0.0.1/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["page.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "bookmark": {
+      "suggested_key": { "default": "Alt+B" },
+      "description": "Bookmark this moment"
+    }
+  },
+  "action": { "default_title": "Open Earmark" },
+  "side_panel": { "default_path": "bookmarks.html" },
+  "options_page": "options.html"
+}

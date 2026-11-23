@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earmark</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="library">
+<main id="main">
+  <!-- Controls live outside #list, which is re-rendered on every storage change. -->
+  <header id="controls" class="bar">
+    <a class="brand" href="bookmarks.html" target="_blank" rel="noopener" title="Open Earmark in a full tab"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2.5h10A1.5 1.5 0 0 1 18.5 4v17.2a.6.6 0 0 1-.93.5L12 18.1l-5.57 3.6a.6.6 0 0 1-.93-.5V4A1.5 1.5 0 0 1 7 2.5z"/></svg><h1>Earmark</h1></a>
+    <input id="q" type="search" placeholder="Search" aria-label="Search notes" autocomplete="off">
+    <div class="toggle" role="group" aria-label="Order">
+      <button data-view="latest" aria-pressed="true">Latest</button>
+      <button data-view="videos" aria-pressed="false">By video</button>
+    </div>
+    <button id="toggleFilters" class="icon" aria-expanded="false" aria-controls="filters" title="Filters" aria-label="Filters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg><span id="filterCount"></span></button>
+    <a class="icon" href="options.html" target="_blank" rel="noopener" title="Options" aria-label="Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></a>
+  </header>
+  <div id="filters" class="filters" hidden>
+    <select id="category" aria-label="Category"></select>
+    <select id="tag" aria-label="Tag"></select>
+    <select id="channel" aria-label="Channel"></select>
+    <select id="video" aria-label="Video"></select>
+    <label class="date">From <input id="from" type="date"></label>
+    <label class="date">To <input id="to" type="date"></label>
+  </div>
+  <p class="status"><span id="count" aria-live="polite"></span><button id="clear" class="link" hidden>Clear</button></p>
+
+  <div id="list"></div>
+</main>
+<script type="module" src="bookmarks.js"></script>
+</body>
+</html>

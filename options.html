@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earmark options</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2.5h10A1.5 1.5 0 0 1 18.5 4v17.2a.6.6 0 0 1-.93.5L12 18.1l-5.57 3.6a.6.6 0 0 1-.93-.5V4A1.5 1.5 0 0 1 7 2.5z"/></svg><h1>Options</h1></div>
+    <a href="bookmarks.html">Back to bookmarks</a>
+  </header>
+  <div class="how">
+    <div><b>Press once</b>⌥ B (Alt+B), or the bookmark button in the YouTube player.</div>
+    <div><b>Press twice</b>Within two seconds, for the whole argument.</div>
+    <div><b>Read later</b>Notes appear in your library about 20 seconds after a press.</div>
+  </div>
+  <div class="form">
+
+  <label for="provider">Where the AI runs</label>
+  <select id="provider">
+    <option value="outlet">Outlet (your own AI, through the Outlet app)</option>
+    <option value="codex">Local Codex CLI, through a small bridge you run in a terminal</option>
+  </select>
+
+  <div id="outletBox" class="box">
+    <p class="hint">Outlet runs on this computer and uses the AI account you connected in it. Earmark asks once; you compare a code and choose Allow in Outlet. The model is the one picked in Outlet's Configure → Model.</p>
+    <p id="outletState" class="outlet-state"></p>
+    <div id="outletCode" class="outlet-code" hidden>
+      <span class="meta">Code to compare in Outlet</span>
+      <strong id="outletDigits"></strong>
+      <span class="meta">In Outlet, choose <b>Change</b> and pick <b>7 days</b> and <b>1,000 requests</b> so Earmark doesn't ask again soon, then <b>Allow</b>.</span>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button id="outletConnect" class="primary">Connect to Outlet</button>
+      <button id="outletDisconnect" hidden>Disconnect</button>
+    </div>
+    <p class="hint">Outlet forgets every app when it quits, so after restarting Outlet, connect again here. Presses made in between are kept and processed once you do.</p>
+  </div>
+
+  <div id="codexBox" class="box">
+    <label for="codexModel">Codex model</label>
+    <input id="codexModel" type="text" placeholder="gpt-6.1-sol">
+    <label for="codexEffort">Reasoning effort</label>
+    <select id="codexEffort">
+      <option>low</option><option>medium</option><option>high</option><option>xhigh</option>
+    </select>
+    <label for="bridgeUrl">Local bridge address</label>
+    <input id="bridgeUrl" type="text" placeholder="http://127.0.0.1:8765">
+    <p class="hint">The bridge must be running: <code>node local/server.mjs</code> in the earmark folder. Presses made while it is off are kept and processed when it is back. <span id="health"></span></p>
+  </div>
+
+
+  <label class="check"><input id="downloadNotes" type="checkbox"> Also download each note as a Markdown file</label>
+  <p class="hint">Off by default: every note stays attached to its bookmark in the library, where you can read, copy or download it any time.</p>
+  <div id="folderBox" class="box">
+    <label for="folder">Folder inside Downloads</label>
+    <input id="folder" type="text" placeholder="earmark">
+    <p class="hint">Chrome extensions can only write inside your Downloads folder. If Chrome asks where to save every file, turn off "Ask where to save each file" in Chrome's download settings.</p>
+  </div>
+
+  <div class="row" style="margin-top:24px">
+    <button id="save" class="primary">Save</button>
+    <span id="saved" class="meta"></span>
+  </div>
+  </div>
+  <p class="hint" style="margin-top:16px">Change the shortcut at <code>chrome://extensions/shortcuts</code>.</p>
+
+  <div class="form danger">
+    <label>Start from scratch</label>
+    <p class="hint">Deletes every bookmark, the saved transcripts and the accuracy log from this browser. Your settings stay. Markdown files you downloaded are not touched.</p>
+    <div class="row" style="margin-top:12px">
+      <button id="wipe">Delete all data</button>
+      <span id="wiped" class="meta"></span>
+    </div>
+  </div>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>
