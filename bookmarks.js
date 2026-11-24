@@ -216,7 +216,7 @@ function note(bm, { underVideo = false } = {}) {
 
   const player = el('div', { class: 'player' });
   player.hidden = true;
-  const time = `${fmtTime(bm.span.start)}–${fmtTime(bm.span.end)}`;
+  const time = bm.span.source === 'full' ? 'Whole video' : `${fmtTime(bm.span.start)}–${fmtTime(bm.span.end)}`;
 
   node = el('article', { class: 'note' },
     el('h2', {}, n.title, statusTag(bm)),

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  resolveSpan, spanText, segEnd, renderNote, noteFilename, transcriptBlock, spanTask, fmtTime,
+  resolveSpan, fullSpan, spanText, segEnd, renderNote, noteFilename, transcriptBlock, spanTask, fmtTime,
   REWRITE_SCHEMA, SPAN_SCHEMA, rewriteTask, kebab, normaliseTags, verifyQuote, cleanNote, playUrl, clipUrl,
 } from '../lib/pipeline.js';
 
@@ -53,6 +53,17 @@ test('an unusable answer falls back to a fixed window', () => {
   }
 });
 
+test('a double press covers the whole video, wherever it was pressed', () => {
+  const span = fullSpan(segs);
+  assert.equal(span.start, 0);
+  assert.equal(span.end, 302);
+  assert.equal(span.source, 'full');
+  assert.equal(spanText(segs, span.start, span.end).split(' ').length, 100);
+  assert.ok(rewriteTask(span).includes('entire video'));
+  assert.ok(!rewriteTask(span).includes('The passage runs from'));
+  assert.ok(rewriteTask({ start: 99, end: 147 }).includes('The passage runs from 99.0 to 147.0'));
+});
+
 test('span text covers exactly the chosen segments', () => {
   assert.equal(spanText(segs, 99, 108), 'line33 line34 line35');
 });
@@ -62,7 +73,6 @@ test('prompt keeps the press out of the cached transcript block', () => {
   assert.ok(!block.includes('150'.concat('.0 seconds')));
   assert.ok(block.includes('[297.0] line99'));
   assert.ok(spanTask(press).includes('t=150.0 seconds (2:30)'));
-  assert.ok(spanTask({ ...press, width: 'wide' }).includes('whole argument'));
   assert.ok(!/\b(15|120) (to|seconds)|5 minutes/.test(spanTask(press)));
   assert.ok(spanTask(press).includes('no target length'));
   assert.ok(spanTask(press, { kind: 'wider', start: 99, end: 147 }).includes('too narrow'));

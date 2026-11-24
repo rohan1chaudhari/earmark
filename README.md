@@ -35,7 +35,7 @@ Outlet forgets every app when it quits, so connect again after restarting it. Pr
 ## Use
 
 - **Press once** (<kbd>Alt</kbd>+<kbd>B</kbd>, or the bookmark button in the YouTube player) to keep the moment. Playback continues; a small card confirms it.
-- **Press twice** within two seconds for "the whole argument, not just the last line".
+- **Press twice** within two seconds for one note on the whole video, start to end, wherever you are in it.
 - **Open your notes** with the toolbar icon. They open in Chrome's side panel, beside the video.
   - **Latest** lists notes newest first. **By video** groups them under each video's title.
   - **Play** plays just the passage. **Transcript** shows the whole transcript at your passage, highlighted, with a marker where you pressed. The first time you open a video's transcript, the AI labels who is speaking.
@@ -47,7 +47,7 @@ Change the shortcut at `chrome://extensions/shortcuts`.
 
 ## How it works
 
-Each press saves the video position and the video's captions straight away, so nothing is lost if the AI is busy. Then two model calls run:
+Each press saves the video position and the video's captions straight away, so nothing is lost if the AI is busy. Then two model calls run (a double press skips the first: the passage is the whole video):
 
 1. **Which passage?** The model gets the whole transcript, with the press time marked, and picks the start and end of what you most likely meant. There are no fixed time rules.
 2. **The note.** The model rewrites that passage as a title and points, picks a quote (kept only if it appears word for word), and files it under a category and tags, reusing ones you already have.

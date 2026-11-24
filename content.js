@@ -234,10 +234,10 @@
 
   async function onPress() {
     if (open) {
-      // Second press inside the window: same moment, wider passage.
+      // Second press inside the window: a note on the whole video.
       clearTimeout(open.timer);
-      open.press.width = 'wide';
-      indicate({ title: `Earmarked ${fmt(open.press.t_press)}`, sub: 'Whole argument', state: 'info', ms: 2200, pop: true });
+      open.press.width = 'full';
+      indicate({ title: 'Earmarked the whole video', sub: 'One note for all of it', state: 'info', ms: 2200, pop: true });
       const p = open.press;
       open = null;
       send(p);
@@ -269,7 +269,7 @@
       duration: snap.duration,
     };
     activeId = press.id;
-    indicate({ title: `Earmarked ${fmt(press.t_press)}`, sub: 'Press again for the whole argument', state: 'info', ms: 2600 });
+    indicate({ title: `Earmarked ${fmt(press.t_press)}`, sub: 'Press again for the whole video', state: 'info', ms: 2600 });
     open = {
       press,
       timer: setTimeout(() => {

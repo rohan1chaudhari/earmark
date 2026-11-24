@@ -3,7 +3,7 @@
 // a missing key, a network failure, or the worker being shut down.
 import {
   SYSTEM, SPAN_SCHEMA, REWRITE_SCHEMA, SPEAKERS_SCHEMA, speakersTask, cleanTurns, DETAILS_SCHEMA, detailsTask, cleanDetails,
-  transcriptBlock, spanTask, rewriteTask, resolveSpan, spanText, cleanNote, renderNote, noteFilename,
+  transcriptBlock, spanTask, rewriteTask, resolveSpan, fullSpan, spanText, cleanNote, renderNote, noteFilename,
 } from './lib/pipeline.js';
 import { collectVocabulary } from './lib/library.js';
 import { OUTLET_URL, outletGenerate, TRANSIENT, ENDS_SESSION } from './lib/outlet.js';
@@ -127,8 +127,11 @@ async function processBookmark(id, hint) {
     notify(bm, 'span');
 
     const block = transcriptBlock(bm, tr.segments);
-    const raw = await callModel(cfg, block, spanTask(bm, hint), SPAN_SCHEMA);
-    const span = resolveSpan(raw, tr.segments, bm);
+    // Pressed twice: the whole video, so there is no passage to guess. A later
+    // Wider/Narrower correction goes back to guessing around the press.
+    const span = bm.width === 'full' && !hint
+      ? fullSpan(tr.segments)
+      : resolveSpan(await callModel(cfg, block, spanTask(bm, hint), SPAN_SCHEMA), tr.segments, bm);
     await set(`bm:${id}`, { ...((await get(`bm:${id}`)) || bm), stage: 'rewrite' });
     notify(bm, 'rewrite');
     // Tags already used elsewhere, so the model reuses them rather than inventing synonyms.
